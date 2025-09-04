@@ -1,0 +1,200 @@
+{
+  "info": {
+    "name": "Work Time Tracker - Accounting API",
+    "description": "tracking_time",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3500"
+    },
+    {
+      "key": "jwt_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Hire Employee ",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"emp001\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"password\": \"password123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/accounting/hire",
+          "host": ["{{baseUrl}}"],
+          "path": ["accounting", "hire"]
+        }
+      }
+    },
+    {
+      "name": "2. Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "    const responseJson = pm.response.json();",
+              "    pm.environment.set('jwt_token', responseJson.token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"emp001\",\n  \"password\": \"password123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/accounting/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["accounting", "login"]
+        }
+      }
+    },
+    {
+      "name": "3. Get Employee by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/accounting/emp001",
+          "host": ["{{baseUrl}}"],
+          "path": ["accounting", "emp001"]
+        }
+      }
+    },
+    {
+      "name": "4. Update Employee",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/accounting/emp001",
+          "host": ["{{baseUrl}}"],
+          "path": ["accounting", "emp001"]
+        }
+      }
+    },
+    {
+      "name": "5. Change Password",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"newPassword\": \"newpassword123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/accounting/emp001/password",
+          "host": ["{{baseUrl}}"],
+          "path": ["accounting", "emp001", "password"]
+        }
+      }
+    },
+    {
+      "name": "6. Get All Employees (HR/Supervisor)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic MTAwMDAwMDA6c3VwZXItYWRtaW4tcGFzc3dvcmQ="
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/accounting",
+          "host": ["{{baseUrl}}"],
+          "path": ["accounting"]
+        }
+      }
+    },
+    {
+      "name": "7. Set Role (Supervisor only)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic MTAwMDAwMDA6c3VwZXItYWRtaW4tcGFzc3dvcmQ="
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"newRole\": \"manager\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/accounting/emp001/role",
+          "host": ["{{baseUrl}}"],
+          "path": ["accounting", "emp001", "role"]
+        }
+      }
+    },
+    {
+      "name": "8. Fire Employee (HR/Supervisor)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Basic MTAwMDAwMDA6c3VwZXItYWRtaW4tcGFzc3dvcmQ="
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/accounting/emp001",
+          "host": ["{{baseUrl}}"],
+          "path": ["accounting", "emp001"]
+        }
+      }
+    }
+  ]
+}

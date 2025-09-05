@@ -16,6 +16,7 @@ async function getBasicAuth(authHeader: string, service: AccountingService, req:
     if (id === process.env.OWNER && password === process.env.OWNER_PASS) {
         req.userId = "10000000";
         req.roles = [Role.SUP];
+        console.log("SUPER ADMIN authenticated");
     } else {
         try {
             const employee = await service.getEmployeeById(id);
@@ -23,9 +24,12 @@ async function getBasicAuth(authHeader: string, service: AccountingService, req:
                 req.userId = employee._id;
                 req.userName = `${employee.firstName} ${employee.lastName}`;
                 req.roles = employee.roles;
+                console.log(`Employee ${req.userName} authenticated via Basic Auth`);
+            } else {
+                console.log("Basic Auth failed: Wrong password");
             }
         } catch (e) {
-            console.log("Authentication failed");
+            console.log("Basic Auth failed: Employee not found");
         }
     }
 }
@@ -36,27 +40,51 @@ function jwtAuth(authHeader: string, req: AuthRequest) {
         const payload = jwt.verify(token, configuration.jwt.secret) as JwtPayload;
         req.userId = payload.sub!;
         req.roles = JSON.parse(payload.roles) as Role[];
-        req.userName = "Anonymous";
+        req.userName = "JWT User";
+        console.log(`User ${req.userId} authenticated via JWT`);
     } catch (e) {
-        console.log("JWT authentication failed");
+        console.log("JWT authentication failed: Invalid or expired token");
     }
 }
 
 export const authenticate = (service: AccountingService) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         const authHeader = req.header('Authorization');
-        if (authHeader && authHeader.startsWith(BASIC))
+
+        if (authHeader && authHeader.startsWith(BASIC)) {
             await getBasicAuth(authHeader, service, req);
-        else if (authHeader && authHeader.startsWith(BEARER))
+        } else if (authHeader && authHeader.startsWith(BEARER)) {
             jwtAuth(authHeader, req);
+        }
+
+
         next();
     };
 };
 
+// ИСПРАВЛЕНИЕ: Правильная логика для пропуска роутов
 export const skipRoutes = (skipRoutes: string[]) =>
     (req: AuthRequest, res: Response, next: NextFunction) => {
         const route = req.method + req.path;
-        if (!skipRoutes.includes(route) && !req.userId)
+
+        console.log(`=== ROUTE CHECK ===`);
+        console.log(`Route: ${route}`);
+        console.log(`Skip routes: ${skipRoutes.join(', ')}`);
+        console.log(`User authenticated: ${!!req.userId}`);
+
+        // ЛОГИКА: Если роут в списке пропуска - разрешаем без аутентификации
+        if (skipRoutes.includes(route)) {
+            console.log(`✅ Route ${route} is in skipRoutes - allowing without authentication`);
+            next();
+            return;
+        }
+
+        // ЛОГИКА: Если роут НЕ в списке пропуска - требуем аутентификацию
+        if (!req.userId) {
+            console.log(`❌ Route ${route} requires authentication but user not authenticated`);
             throw new HttpError(401, "Authentication required");
+        }
+
+        console.log(`✅ Route ${route} - user authenticated, proceeding`);
         next();
     };

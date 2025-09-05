@@ -10,8 +10,12 @@ export interface AppConfig {
         secret: string;
         exp: string | number;
     };
-    timeWindowMs: number;
-    requestLimit: number;
+
+    rateLimiting: {
+        windowMs: number;
+        maxRequests: number;
+        enabledForRoles: string[];
+    };
 }
 
 dotenv.config();
@@ -29,6 +33,10 @@ export const configuration: AppConfig = {
         secret: process.env.JWT_SECRET || "super-secret-jwt-key-for-work-time-tracker",
         exp: process.env.JWT_EXP || "1h"
     },
-    timeWindowMs: 60000,
-    requestLimit: 3
+
+    rateLimiting: {
+        windowMs: 60 * 1000,
+        maxRequests: 10,
+        enabledForRoles: ["crew"]
+    }
 };

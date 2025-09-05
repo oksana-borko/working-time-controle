@@ -13,7 +13,10 @@ export const configuration = {
         secret: process.env.JWT_SECRET || "super-secret-jwt-key-for-work-time-tracker",
         exp: process.env.JWT_EXP || "1h"
     },
-    timeWindowMs: 60000,
-    requestLimit: 3
+    rateLimiting: {
+        windowMs: 60 * 1000,
+        maxRequests: 10,
+        enabledForRoles: ["crew"]
+    }
 };
 //# sourceMappingURL=appConfig.js.map

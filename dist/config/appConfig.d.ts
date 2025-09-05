@@ -8,7 +8,10 @@ export interface AppConfig {
         secret: string;
         exp: string | number;
     };
-    timeWindowMs: number;
-    requestLimit: number;
+    rateLimiting: {
+        windowMs: number;
+        maxRequests: number;
+        enabledForRoles: string[];
+    };
 }
 export declare const configuration: AppConfig;
